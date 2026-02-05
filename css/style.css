@@ -1,3 +1,5 @@
+@import 'extra_mechanics.css';
+
 /* Existing Variables + New Layout */
 :root {
     --bg-color: #121212;

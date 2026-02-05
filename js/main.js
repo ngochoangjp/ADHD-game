@@ -2,6 +2,7 @@
 import { initUI, updateUI } from './ui.js';
 import { ImpulsivitySystem } from './mechanics/impulsivity.js';
 import { OverloadSystem } from './mechanics/overload.js';
+import { SocialSystem } from './mechanics/social.js';
 import { DistractionMinigame } from './minigames/distraction.js';
 
 export const GameState = {
@@ -10,17 +11,17 @@ export const GameState = {
     maskingEnergy: 100,
 
     // Time
-    dayTimer: 0, // Seconds passed
-    gameHour: 9, // Starts at 9 AM
+    dayTimer: 0,
+    gameHour: 9,
 
     // Task Management
     activeTaskId: null,
     tasks: {
-        work: { id: 'work', name: 'Work Project', progress: 50, decay: 1.5, color: '#4caf50' },
-        cook: { id: 'cook', name: 'Meal Prep', progress: 20, decay: 2.0, color: '#ff9800' },
-        clean: { id: 'clean', name: 'House Cleaning', progress: 30, decay: 1.0, color: '#2196f3' },
-        email: { id: 'email', name: 'Inbox Zero', progress: 10, decay: 3.0, color: '#e91e63' },
-        hobby: { id: 'hobby', name: 'Painting', progress: 0, decay: 1.0, color: '#9c27b0' }
+        work: { id: 'work', name: 'Work Project', progress: 50, decay: 1.5 },
+        cook: { id: 'cook', name: 'Meal Prep', progress: 20, decay: 2.0 },
+        clean: { id: 'clean', name: 'House Cleaning', progress: 30, decay: 1.0 },
+        email: { id: 'email', name: 'Inbox Zero', progress: 10, decay: 3.0 },
+        hobby: { id: 'hobby', name: 'Painting', progress: 0, decay: 1.0 }
     },
 
     // Meters
@@ -30,7 +31,8 @@ export const GameState = {
     // Flags
     isPaused: false,
     activeMinigame: null,
-    hyperfocusTarget: null, // If set, can only work on this
+    hyperfocusTarget: null,
+    hyperfocusTimer: 0,
 
     constants: {
         SWITCH_COST: 10,
@@ -42,16 +44,19 @@ export const GameState = {
 let lastTime = 0;
 
 function initGame() {
-    console.log("NeuroSpicy Daily Grind Initializing...");
+    console.log("NeuroSpicy Daily Grind Initializing... State:", GameState);
+    if (!GameState) {
+        alert("CRITICAL ERROR: GameState failed to load!");
+        return;
+    }
 
     initUI();
     ImpulsivitySystem.init();
     OverloadSystem.init();
+    SocialSystem.init();
 
-    // Setup Global Select for HTML onclicks
     window.selectTask = selectTask;
 
-    // Action Buttons
     document.getElementById('btn-perform-action').addEventListener('click', doTaskWork);
     document.getElementById('btn-stim').addEventListener('click', actionStim);
     document.getElementById('btn-breathe').addEventListener('click', actionBreathe);
@@ -61,51 +66,100 @@ function initGame() {
 
 function selectTask(taskId) {
     if (GameState.isPaused) return;
+    if (GameState.activeTaskId === taskId) return;
 
-    if (GameState.activeTaskId === taskId) return; // Already active
+    // HYPERFOCUS CHECK
+    if (GameState.hyperfocusTarget) {
+        showFloatingText("LOCKED BY HYPERFOCUS!", "purple");
+        // Shake the card to show it's locked?
+        return;
+    }
 
-    // Check Costs
     if (GameState.focusPoints < GameState.constants.SWITCH_COST) {
         showFloatingText("Not enough Focus!", "red");
         return;
     }
 
-    if (GameState.hyperfocusTarget && GameState.hyperfocusTarget !== taskId) {
-        showFloatingText("LOCKED BY HYPERFOCUS!", "purple");
-        return;
-    }
+    // EXECUTIVE DYSFUNCTION CHECK
+    // If Impulse is High or Focus Low, switching is hard
+    // Simple chance to fail switch? 
+    // For now, allow switch but with heavy penalty if dysfunctional?
+    // Let's keep it simple: Just cost check.
 
     // Deduct cost and switch
     GameState.focusPoints -= GameState.constants.SWITCH_COST;
     GameState.activeTaskId = taskId;
-
-    // Add a bit of impulsivity/stress on switch (Cognitive switching penalty)
     ImpulsivitySystem.add(2);
 
     updateUI(GameState);
 }
 
+// Variables for Executive Dysfunction "Wall"
+let dysfunctionClicksNeeded = 0;
+
 function doTaskWork() {
     if (!GameState.activeTaskId || GameState.isPaused) return;
 
+    // EXECUTIVE DYSFUNCTION LOGIC
+    // If interest is low (low progress) OR Overload high, it might be hard to start
+    if (dysfunctionClicksNeeded > 0) {
+        dysfunctionClicksNeeded--;
+
+        // Visual Feedback (Button Shake)
+        const btn = document.getElementById('btn-perform-action');
+        btn.classList.remove('btn-resist');
+        void btn.offsetWidth; // trigger reflow
+        btn.classList.add('btn-resist');
+
+        if (dysfunctionClicksNeeded === 0) {
+            showFloatingText("BROKE THE WALL!", "white");
+        } else {
+            return; // Click absorbed by the wall
+        }
+    }
+
+    // Determine if we trigger a randomly high "Wall" for next time
+    // Only happens if we are stressed
+    if (GameState.overload > 50 && Math.random() < 0.2) {
+        dysfunctionClicksNeeded = 3; // Must click 3 times to actually work next time
+    }
+
+    // Normal Work Logic
     const task = GameState.tasks[GameState.activeTaskId];
 
-    // Gain Progress
     let gain = 5;
-    if (GameState.hyperfocusTarget === task.id) gain = 15; // Boost!
+    if (GameState.hyperfocusTarget === task.id) {
+        gain = 15;
+        // Extend Hyperfocus slightly?
+        GameState.hyperfocusTimer += 0.5;
+    }
 
     task.progress = Math.min(100, task.progress + gain);
+    OverloadSystem.add(1);
 
-    // Cost
-    OverloadSystem.add(1); // Working adds strain
+    // Check for Hyperfocus Trigger
+    if (!GameState.hyperfocusTarget && Math.random() < 0.05) { // 5% chance per click
+        triggerHyperfocus(task.id);
+    }
 
-    // Reward?
     if (Math.random() < 0.1) {
-        // Occasional Focus refund (Flow state)
         GameState.focusPoints = Math.min(100, GameState.focusPoints + 5);
         showFloatingText("In the zone! +5 FP", "cyan");
     }
 
+    updateUI(GameState);
+}
+
+function triggerHyperfocus(taskId) {
+    console.log("HYPERFOCUS TRIGGERED ON", taskId);
+    GameState.hyperfocusTarget = taskId;
+    GameState.hyperfocusTimer = 15; // 15 Seconds of glory
+    GameState.focusPoints = 100; // Free refill!
+
+    showFloatingText("HYPERFOCUS ACTIVATED!", "gold");
+    document.body.classList.add('hyperfocus-active');
+
+    // Update UI immediately to show effect
     updateUI(GameState);
 }
 
@@ -114,12 +168,13 @@ function actionStim() {
         GameState.focusPoints -= 5;
         ImpulsivitySystem.reduce(15);
         showFloatingText("Stimmed! -Impulse", "green");
+        updateUI(GameState);
     }
 }
 
 function actionBreathe() {
     OverloadSystem.reduce(20);
-    // Maybe costs time?
+    updateUI(GameState);
 }
 
 function gameLoop(timestamp) {
@@ -128,21 +183,34 @@ function gameLoop(timestamp) {
     lastTime = timestamp;
 
     if (!GameState.isPaused) {
-        // 1. Update Systems
         ImpulsivitySystem.update(dt);
         OverloadSystem.update(dt);
+        SocialSystem.update(dt);
 
-        // 2. Task Decay (Real-time pressure!)
-        for (const key in GameState.tasks) {
-            const task = GameState.tasks[key];
-            if (key !== GameState.activeTaskId) {
-                // Inactive tasks decay
-                task.progress = Math.max(0, task.progress - (task.decay * dt));
+        // Hyperfocus Timer
+        if (GameState.hyperfocusTarget) {
+            GameState.hyperfocusTimer -= dt;
+            if (GameState.hyperfocusTimer <= 0) {
+                // End Hyperfocus
+                GameState.hyperfocusTarget = null;
+                document.body.classList.remove('hyperfocus-active');
+                // Crash energy?
+                GameState.focusPoints = 20;
+                showFloatingText("Hyperfocus Ended... Crash.", "grey");
             }
         }
 
-        // 3. Time Passive Focus Regen ?
-        // Maybe very slow?
+        // Task Decay
+        for (const key in GameState.tasks) {
+            const task = GameState.tasks[key];
+            if (key !== GameState.activeTaskId) {
+                // Logic: Hyperfocus completely ignores other tasks, so they decay normally (or faster?)
+                // Let's make them decay faster to punish the single-mindedness
+                const decayMult = GameState.hyperfocusTarget ? 2.0 : 1.0;
+                task.progress = Math.max(0, task.progress - (task.decay * dt * decayMult));
+            }
+        }
+
         if (GameState.focusPoints < 100) {
             GameState.focusPoints += 0.5 * dt;
         }
@@ -154,9 +222,8 @@ function gameLoop(timestamp) {
 }
 
 function showFloatingText(text, color) {
-    console.log(`FLOAT: ${text} (${color})`);
-    // Ideally spawn a DOM element at mouse or center
-    // For now, logging.
+    // Simple console fallback for now
+    console.log(`% c ${text} `, `color: ${color}; font - size: 1.2rem; font - weight: bold; `);
 }
 
 // Reuse Minigame Logic
@@ -169,7 +236,7 @@ export function startMinigame(type) {
             endMinigame();
             if (success) {
                 ImpulsivitySystem.reduce(50);
-                GameState.focusPoints += 20; // Recover focus
+                GameState.focusPoints += 20;
             }
         });
         GameState.activeMinigame = game;

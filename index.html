@@ -14,6 +14,7 @@
     <div id="game-container">
         <!-- Visualization of Overload (filters) -->
         <div id="visual-filters"></div>
+        <div id="hyperfocus-overlay" class="hidden"></div>
 
         <!-- HUD: Global Stats -->
         <header id="hud-top">
@@ -29,26 +30,7 @@
                 </div>
             </div>
 
-            <div class="stat-group">
-                <span class="label">Masking</span>
-                <div class="meter-bar-small">
-                    <div id="meter-masking" class="fill fill-masking" style="width: 100%;"></div>
-                </div>
-            </div>
 
-            <div class="stat-group">
-                <span class="label">Impulsivity</span>
-                <div class="meter-bar-small">
-                    <div id="meter-impulsivity" class="fill fill-danger" style="width: 0%;"></div>
-                </div>
-            </div>
-
-            <div class="stat-group">
-                <span class="label">Overload</span>
-                <div class="meter-bar-small">
-                    <div id="meter-overload" class="fill fill-warn" style="width: 0%;"></div>
-                </div>
-            </div>
         </header>
 
         <!-- Main Dashboard: 5 Tasks -->
@@ -110,6 +92,21 @@
 
         <!-- Layers -->
         <div id="popups-layer"></div>
+
+        <div id="social-modal-overlay" class="hidden">
+            <div class="social-modal">
+                <div class="npc-avatar">👤</div>
+                <h3 id="social-title">Coworker Approaches!</h3>
+                <p id="social-text">"Hey, got a minute to chat about the game last night?"</p>
+                <div class="social-choices">
+                    <button id="btn-social-mask" class="social-btn mask-btn">Mask (Polite) <br><span class="cost">-20
+                            Masking</span></button>
+                    <button id="btn-social-slip" class="social-btn slip-btn">Mask Slip (Awkward) <br><span
+                            class="cost">+15 Impulse</span></button>
+                </div>
+            </div>
+        </div>
+
         <div id="minigame-overlay" class="hidden">
             <div class="minigame-content">
                 <h2 id="minigame-title">Event</h2>
