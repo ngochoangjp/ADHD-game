@@ -61,6 +61,9 @@ export const OverloadSystem = {
         const text = texts[Math.floor(Math.random() * texts.length)];
         const popupsLayer = document.getElementById('popups-layer');
 
+        // Safety check - don't spawn if layer doesn't exist
+        if (!popupsLayer) return;
+
         const el = document.createElement('div');
         el.className = 'popup';
         el.innerText = text;

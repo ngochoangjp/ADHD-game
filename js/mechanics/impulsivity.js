@@ -2,6 +2,7 @@
 // Simulates the internal urge to do something else.
 
 import { GameState } from '../main.js';
+import { showTip } from '../ui.js';
 
 export const ImpulsivitySystem = {
     init() {
@@ -29,12 +30,12 @@ export const ImpulsivitySystem = {
 
     triggerHijack() {
         console.log("BRAIN HIJACKED!");
-        // Trigger the distraction minigame via the main module
-        // We access the global for now to avoid circular dependency issues roughly, 
-        // or we could pass a callback from main.init().
-        // For ES modules, circular deps are handled but 'startMinigame' needs to be imported if we want to use it directly.
-        // However, referencing window.NeuroGame is a quick dirty way, let's try a better import approach or use the window global since we set it up.
+        // Reset impulsivity to prevent immediate retrigger after minigame ends
+        GameState.impulsivity = 0;
 
+        showTip("🎭 Brain hijack! When impulse gets too high, your brain demands stimulation NOW.");
+
+        // Trigger the distraction minigame via the main module
         if (window.NeuroGame && window.NeuroGame.startMinigame) {
             window.NeuroGame.startMinigame('distraction');
         }

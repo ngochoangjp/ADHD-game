@@ -1,7 +1,7 @@
 // Social Masking Mechanic
 
 import { GameState } from '../main.js';
-import { updateUI } from '../ui.js';
+import { updateUI, showTip } from '../ui.js';
 import { ImpulsivitySystem } from './impulsivity.js';
 
 export const SocialSystem = {
@@ -43,6 +43,8 @@ export const SocialSystem = {
 
         document.getElementById('social-text').innerText = `"${text}"`;
         document.getElementById('social-modal-overlay').classList.remove('hidden');
+
+        showTip("😰 Social situations drain 'masking energy' - the effort to appear neurotypical.");
     },
 
     resolve(didMask) {
@@ -60,6 +62,7 @@ export const SocialSystem = {
         } else {
             // Mask Slip
             ImpulsivitySystem.add(15); // Stress spike
+            showTip("😅 Mask slips happen! The stress spike reflects the anxiety of 'being yourself'.");
             // Maybe social penalty (future feature)
         }
 

@@ -75,18 +75,11 @@ export function updateUI(state) {
     else if (state.overload > 20) grid.classList.add('overload-stage-1');
 }
 
-function setStyleWidth(id, val, color) {
-    const el = document.getElementById(id);
-    if (el) {
-        el.style.width = `${val}%`;
-        if (color) el.style.backgroundColor = color;
-    }
-}
-
 function formatTime(hour) {
-    // Dummy implementation. In real thing update hour based on timer
-    // For now simple static
-    return "10:30 AM";
+    // Convert game hour to readable time format
+    const displayHour = hour > 12 ? hour - 12 : hour;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    return `${displayHour}:00 ${ampm}`;
 }
 
 // Helper function to get dynamic status text based on task state
@@ -109,4 +102,56 @@ function getStatusClass(progress, isActive) {
     if (progress >= 50) return "status-okay";
     if (progress >= 30) return "status-warn";
     return "status-danger";
+}
+
+export function showFloatingText(text, color) {
+    const el = document.createElement('div');
+    el.className = 'floating-text';
+    el.innerText = text;
+    el.style.color = color || 'white';
+
+    // Screen Center with light random offset
+    const x = 50 + (Math.random() * 20 - 10);
+    const y = 40 + (Math.random() * 20 - 10);
+
+    el.style.left = `${x}%`;
+    el.style.top = `${y}%`;
+
+    const container = document.getElementById('game-container');
+    if (container) container.appendChild(el);
+
+    // Style cleanup matches animation duration
+    setTimeout(() => {
+        if (el.parentNode) el.remove();
+    }, 1500);
+}
+
+// Educational tip notification - explains ADHD mechanics
+let tipTimeout = null;
+export function showTip(text) {
+    let tipContainer = document.getElementById('tip-container');
+
+    // Create container if it doesn't exist
+    if (!tipContainer) {
+        tipContainer = document.createElement('div');
+        tipContainer.id = 'tip-container';
+        document.getElementById('game-container').appendChild(tipContainer);
+    }
+
+    // Clear existing timeout to prevent overlap
+    if (tipTimeout) {
+        clearTimeout(tipTimeout);
+    }
+
+    // Set content and show
+    tipContainer.innerHTML = `
+        <div class="tip-icon">💡</div>
+        <div class="tip-text">${text}</div>
+    `;
+    tipContainer.classList.add('visible');
+
+    // Auto-hide after 4 seconds
+    tipTimeout = setTimeout(() => {
+        tipContainer.classList.remove('visible');
+    }, 4000);
 }

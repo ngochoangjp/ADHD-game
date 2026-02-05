@@ -1,5 +1,5 @@
 // Main Game Logic - NeuroSpicy Daily Grind
-import { initUI, updateUI } from './ui.js';
+import { initUI, updateUI, showFloatingText, showTip } from './ui.js';
 import { ImpulsivitySystem } from './mechanics/impulsivity.js';
 import { OverloadSystem } from './mechanics/overload.js';
 import { SocialSystem } from './mechanics/social.js';
@@ -71,7 +71,7 @@ function selectTask(taskId) {
     // HYPERFOCUS CHECK
     if (GameState.hyperfocusTarget) {
         showFloatingText("LOCKED BY HYPERFOCUS!", "purple");
-        // Shake the card to show it's locked?
+        showTip("🧠 Hyperfocus makes it hard to switch tasks, even when you want to!");
         return;
     }
 
@@ -90,6 +90,11 @@ function selectTask(taskId) {
     GameState.focusPoints -= GameState.constants.SWITCH_COST;
     GameState.activeTaskId = taskId;
     ImpulsivitySystem.add(2);
+
+    // Educational tip on task switching
+    if (Math.random() < 0.3) {
+        showTip("💭 Task switching costs extra mental energy for ADHD brains!");
+    }
 
     updateUI(GameState);
 }
@@ -113,7 +118,9 @@ function doTaskWork() {
 
         if (dysfunctionClicksNeeded === 0) {
             showFloatingText("BROKE THE WALL!", "white");
+            showTip("🎯 Executive dysfunction makes starting tasks feel impossible - even simple ones!");
         } else {
+            showTip("🧱 The 'wall' is real! Keep trying - sometimes starting is the hardest part.");
             return; // Click absorbed by the wall
         }
     }
@@ -153,11 +160,13 @@ function doTaskWork() {
 function triggerHyperfocus(taskId) {
     console.log("HYPERFOCUS TRIGGERED ON", taskId);
     GameState.hyperfocusTarget = taskId;
+    GameState.activeTaskId = taskId; // Sync active task with hyperfocus target
     GameState.hyperfocusTimer = 15; // 15 Seconds of glory
     GameState.focusPoints = 100; // Free refill!
 
     showFloatingText("HYPERFOCUS ACTIVATED!", "gold");
     document.body.classList.add('hyperfocus-active');
+    showTip("⚡ Hyperfocus: Amazing productivity, but other tasks will suffer!");
 
     // Update UI immediately to show effect
     updateUI(GameState);
@@ -197,6 +206,17 @@ function gameLoop(timestamp) {
                 // Crash energy?
                 GameState.focusPoints = 20;
                 showFloatingText("Hyperfocus Ended... Crash.", "grey");
+                showTip("😴 Post-hyperfocus crash: Your brain used all its energy on one thing!");
+            }
+        }
+
+        // Time Progression
+        GameState.dayTimer += dt;
+        if (GameState.dayTimer >= 30) { // Every 30 seconds = 1 game hour
+            GameState.dayTimer = 0;
+            GameState.gameHour++;
+            if (GameState.gameHour >= 18) { // End of day at 6 PM
+                // Could trigger end of day event here
             }
         }
 
@@ -221,10 +241,9 @@ function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
 }
 
-function showFloatingText(text, color) {
-    // Simple console fallback for now
-    console.log(`% c ${text} `, `color: ${color}; font - size: 1.2rem; font - weight: bold; `);
-}
+
+
+// showFloatingText is now imported from ui.js
 
 // Reuse Minigame Logic
 export function startMinigame(type) {
@@ -236,7 +255,7 @@ export function startMinigame(type) {
             endMinigame();
             if (success) {
                 ImpulsivitySystem.reduce(50);
-                GameState.focusPoints += 20;
+                GameState.focusPoints = Math.min(100, GameState.focusPoints + 20);
             }
         });
         GameState.activeMinigame = game;
