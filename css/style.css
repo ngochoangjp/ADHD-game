@@ -1,0 +1,278 @@
+/* Existing Variables + New Layout */
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --primary-color: #bb86fc;
+    --secondary-color: #03dac6;
+    --danger-color: #cf6679;
+    --warn-color: #ff9800;
+    --focus-color: #2196f3;
+    --masking-color: #9c27b0;
+
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: radial-gradient(circle at center, #0f0f13 0%, #000 100%);
+    color: var(--text-color);
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- HUD Top Bar --- */
+#hud-top {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+    height: 60px;
+    box-sizing: border-box;
+}
+
+.stat-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 15%;
+}
+
+.label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+}
+
+.meter-bar-small {
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.fill-masking {
+    background: var(--masking-color);
+}
+
+.fill-danger {
+    background: var(--danger-color);
+}
+
+.fill-warn {
+    background: var(--warn-color);
+}
+
+.resource-pill {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--focus-color);
+}
+
+/* --- Dashboard Grid --- */
+#dashboard-grid {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+}
+
+.task-card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    width: 18%;
+    height: 60%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+    position: relative;
+}
+
+.task-card:hover {
+    transform: translateY(-5px);
+    opacity: 0.9;
+    border-color: var(--primary-color);
+}
+
+.task-card.active {
+    opacity: 1;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 15px rgba(187, 134, 252, 0.3);
+    transform: scale(1.05);
+    background: #252525;
+}
+
+.task-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.progress-container {
+    height: 100%;
+    background: #333;
+    border-radius: 8px;
+    margin: 15px 0;
+    position: relative;
+    width: 20px;
+    /* Vertical bars */
+    align-self: center;
+}
+
+.progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--secondary-color);
+    border-radius: 8px;
+    transition: height 0.3s linear;
+}
+
+/* Different colors for tasks */
+#prog-work {
+    background: #4caf50;
+}
+
+#prog-cook {
+    background: #ff9800;
+}
+
+#prog-clean {
+    background: #2196f3;
+}
+
+#prog-email {
+    background: #e91e63;
+}
+
+#prog-hobby {
+    background: #9c27b0;
+}
+
+.status-text {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* --- Action Area --- */
+#active-task-area {
+    height: 120px;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid var(--glass-border);
+    padding: 10px;
+}
+
+.big-btn {
+    padding: 10px 40px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 25px;
+    background: var(--primary-color);
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.big-btn.disabled {
+    background: #555;
+    cursor: not-allowed;
+    color: #888;
+}
+
+.secondary-btn {
+    background: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    padding: 5px 15px;
+    border-radius: 15px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background: rgba(3, 218, 198, 0.1);
+}
+
+/* --- Overload Visuals (Copy from prev) --- */
+.overload-stage-1 #dashboard-grid {
+    filter: saturate(1.5);
+}
+
+.overload-stage-2 #dashboard-grid {
+    filter: saturate(2) blur(1px);
+    animation: shake 0.5s infinite;
+}
+
+.overload-stage-3 #dashboard-grid {
+    filter: saturate(3) blur(3px) hue-rotate(45deg);
+    animation: chaotic-shake 0.2s infinite;
+}
+
+/* Keep keyframes and popups from before */
+@keyframes shake {
+    0% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(-1px, 2px) rotate(-1deg);
+    }
+
+    100% {
+        transform: translate(1px, -2px) rotate(-1deg);
+    }
+}
+
+@keyframes chaotic-shake {
+    0% {
+        transform: translate(2px, 2px) rotate(2deg);
+    }
+
+    50% {
+        transform: translate(-2px, -2px) rotate(-2deg);
+    }
+
+    100% {
+        transform: translate(2px, 2px) rotate(2deg);
+    }
+}
+
+#minigame-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}

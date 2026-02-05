@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroSpicy: The Daily Grind</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- Visualization of Overload (filters) -->
+        <div id="visual-filters"></div>
+
+        <!-- HUD: Global Stats -->
+        <header id="hud-top">
+            <div class="stat-group">
+                <span class="label">Time</span>
+                <span id="time-display">09:00 AM</span>
+            </div>
+
+            <div class="stat-group">
+                <span class="label">Focus Points</span>
+                <div class="resource-pill" id="res-focus">
+                    <span id="val-focus">100</span> FP
+                </div>
+            </div>
+
+            <div class="stat-group">
+                <span class="label">Masking</span>
+                <div class="meter-bar-small">
+                    <div id="meter-masking" class="fill fill-masking" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="stat-group">
+                <span class="label">Impulsivity</span>
+                <div class="meter-bar-small">
+                    <div id="meter-impulsivity" class="fill fill-danger" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="stat-group">
+                <span class="label">Overload</span>
+                <div class="meter-bar-small">
+                    <div id="meter-overload" class="fill fill-warn" style="width: 0%;"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard: 5 Tasks -->
+        <main id="dashboard-grid">
+            <!-- Task Cards will be injected by JS or hardcoded -->
+            <div class="task-card" id="task-work" onclick="window.selectTask('work')">
+                <h3>💼 Work</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="prog-work" style="width: 20%;"></div>
+                </div>
+                <div class="status-text">Decaying...</div>
+            </div>
+
+            <div class="task-card" id="task-cook" onclick="window.selectTask('cook')">
+                <h3>🍳 Cook</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="prog-cook" style="width: 0%;"></div>
+                </div>
+                <div class="status-text">Stopped</div>
+            </div>
+
+            <div class="task-card" id="task-clean" onclick="window.selectTask('clean')">
+                <h3>🧹 Clean</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="prog-clean" style="width: 50%;"></div>
+                </div>
+                <div class="status-text">Messy</div>
+            </div>
+
+            <div class="task-card" id="task-email" onclick="window.selectTask('email')">
+                <h3>📧 Email</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="prog-email" style="width: 10%;"></div>
+                </div>
+                <div class="status-text">Piling up</div>
+            </div>
+
+            <div class="task-card" id="task-hobby" onclick="window.selectTask('hobby')">
+                <h3>🎨 Hobby</h3>
+                <div class="progress-container">
+                    <div class="progress-bar" id="prog-hobby" style="width: 0%;"></div>
+                </div>
+                <div class="status-text">Neglected</div>
+            </div>
+        </main>
+
+        <!-- Active Task Interaction Area -->
+        <section id="active-task-area">
+            <h2 id="active-task-title">Select a Task to Start</h2>
+            <p id="active-task-desc">Switching tasks costs Focus Points.</p>
+            <button id="btn-perform-action" class="big-btn disabled">Do It!</button>
+
+            <div class="controls-row">
+                <button id="btn-stim" class="secondary-btn" title="Reduce Impulse, Cost Focus">Stim (-Impulse)</button>
+                <button id="btn-breathe" class="secondary-btn" title="Reduce Overload, Cost Time">Breathe
+                    (-Overload)</button>
+            </div>
+        </section>
+
+        <!-- Layers -->
+        <div id="popups-layer"></div>
+        <div id="minigame-overlay" class="hidden">
+            <div class="minigame-content">
+                <h2 id="minigame-title">Event</h2>
+                <div id="minigame-canvas-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
