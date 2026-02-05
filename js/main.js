@@ -144,6 +144,15 @@ function doTaskWork() {
     task.progress = Math.min(100, task.progress + gain);
     OverloadSystem.add(1);
 
+    // Show progress feedback
+    const progressMessages = [
+        `+${gain}% Progress!`,
+        `Working... +${gain}%`,
+        `Keep going! +${gain}%`,
+        `Nice! +${gain}%`
+    ];
+    showFloatingText(progressMessages[Math.floor(Math.random() * progressMessages.length)], gain === 15 ? "gold" : "cyan");
+
     // Check for Hyperfocus Trigger
     if (!GameState.hyperfocusTarget && Math.random() < 0.05) { // 5% chance per click
         triggerHyperfocus(task.id);
@@ -151,7 +160,7 @@ function doTaskWork() {
 
     if (Math.random() < 0.1) {
         GameState.focusPoints = Math.min(100, GameState.focusPoints + 5);
-        showFloatingText("In the zone! +5 FP", "cyan");
+        showFloatingText("In the zone! +5 FP", "lime");
     }
 
     updateUI(GameState);
